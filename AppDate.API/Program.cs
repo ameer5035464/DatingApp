@@ -1,8 +1,11 @@
 
-using AppDate.Controllers;
+using AppDate.Application.Abstraction.Services;
+using AppDate.Application.Services;
 using AppDate.Infrastructure.Persistence._Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace AppDate.API
 {
@@ -18,7 +21,30 @@ namespace AppDate.API
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DataConnectionString"));
             });
+            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            });
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    var tokenKey = builder.Configuration["TokenKey"];
 
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                    };
+
+                });
             builder.Services.AddControllers(); ;
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -35,6 +61,8 @@ namespace AppDate.API
 
             app.UseHttpsRedirection();
 
+            app.UseCors("AllowAll");
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

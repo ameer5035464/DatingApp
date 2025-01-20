@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppDate.Application.Abstraction\AppDate.Application.Abstraction.csproj" />
     <ProjectReference Include="..\AppDate.Domain\AppDate.Domain.csproj" />
     <ProjectReference Include="..\AppDate.Infrastructure.Persistence\AppDate.Infrastructure.Persistence.csproj" />
   </ItemGroup>
